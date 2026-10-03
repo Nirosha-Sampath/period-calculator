@@ -160,10 +160,10 @@
                         මුළු කාලය
                     </div>
                     <div id="formattedTime" class="text-3xl sm:text-4xl font-extrabold text-slate-100 mb-1">
-                        0 පැය 40 මිනිත්තු
+                        මිනිත්තු 40
                     </div>
                     <div id="summaryBadge" class="text-xs text-indigo-300/80 font-medium mt-1">
-                        1 පීරියඩය × මිනිත්තු 40
+                        පීරියඩ් 1 × මිනිත්තු 40
                     </div>
                 </div>
 
@@ -174,9 +174,10 @@
                         <div class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-1" id="labelTotalMinutes">
                             සමස්ත මිනිත්තු ගණන
                         </div>
-                        <div class="flex items-baseline space-x-1.5">
+                        <div class="flex items-baseline" id="totalMinutesContainer">
+                            <span id="prefixMinsUnit" class="text-xl sm:text-2xl font-bold text-amber-400 mr-2">මිනිත්තු</span>
                             <span id="totalMinutes" class="text-2xl sm:text-3xl font-extrabold text-amber-300">40</span>
-                            <span class="text-xs font-semibold text-amber-400/80" id="labelUnitMinutes">මිනිත්තු</span>
+                            <span id="suffixMinsUnit" class="text-xs font-semibold text-amber-400/80 ml-1.5 hidden"></span>
                         </div>
                     </div>
 
@@ -185,9 +186,10 @@
                         <div class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1" id="labelDecimalHours">
                             පැය ගණන (දශම ලෙස)
                         </div>
-                        <div class="flex items-baseline space-x-1.5">
+                        <div class="flex items-baseline" id="decimalHoursContainer">
+                            <span id="prefixHrsUnit" class="text-xl sm:text-2xl font-bold text-purple-400 mr-2">පැය</span>
                             <span id="decimalHours" class="text-2xl sm:text-3xl font-extrabold text-purple-300">0.67</span>
-                            <span class="text-xs font-semibold text-purple-400/80" id="labelUnitHours">පැය</span>
+                            <span id="suffixHrsUnit" class="text-xs font-semibold text-purple-400/80 ml-1.5 hidden"></span>
                         </div>
                     </div>
                 </div>
@@ -219,14 +221,11 @@
                 minsPerPeriod: 'මිනිත්තු',
                 totalAvailableTime: 'මුළු කාලය',
                 totalMinutes: 'සමස්ත මිනිත්තු ගණන',
-                unitMinutes: 'මිනිත්තු',
                 decimalHours: 'පැය ගණන (දශම ලෙස)',
-                unitHours: 'පැය',
                 footerText: 'පීරියඩ් කාල ගණනය කිරීමේ යෙදුම',
                 hrsUnit: 'පැය',
                 minsUnit: 'මිනිත්තු',
-                periodUnitSingular: 'පීරියඩය',
-                periodUnitPlural: 'පීරියඩ්'
+                periodUnit: 'පීරියඩ්'
             },
             en: {
                 title: 'Period Duration Calculator',
@@ -238,12 +237,12 @@
                 minsPerPeriod: 'mins / period',
                 totalAvailableTime: 'Total Available Time',
                 totalMinutes: 'Total Minutes',
-                unitMinutes: 'Minutes',
                 decimalHours: 'Equivalent Decimal Hours',
-                unitHours: 'Hours',
                 footerText: 'Period Duration Calculator',
-                hrsUnit: 'Hours',
-                minsUnit: 'Minutes',
+                hrsUnitSingular: 'hour',
+                hrsUnitPlural: 'hours',
+                minsUnitSingular: 'minute',
+                minsUnitPlural: 'minutes',
                 periodUnitSingular: 'Period',
                 periodUnitPlural: 'Periods'
             }
@@ -267,10 +266,30 @@
             document.getElementById('labelMinsPerPeriod').textContent = t.minsPerPeriod;
             document.getElementById('labelTotalAvailableTime').textContent = t.totalAvailableTime;
             document.getElementById('labelTotalMinutes').textContent = t.totalMinutes;
-            document.getElementById('labelUnitMinutes').textContent = t.unitMinutes;
             document.getElementById('labelDecimalHours').textContent = t.decimalHours;
-            document.getElementById('labelUnitHours').textContent = t.unitHours;
             document.getElementById('footerText').textContent = t.footerText;
+
+            // Handle unit position for single metric displays
+            const prefixMins = document.getElementById('prefixMinsUnit');
+            const suffixMins = document.getElementById('suffixMinsUnit');
+            const prefixHrs = document.getElementById('prefixHrsUnit');
+            const suffixHrs = document.getElementById('suffixHrsUnit');
+
+            if (currentLang === 'si') {
+                prefixMins.textContent = t.minsUnit;
+                prefixMins.classList.remove('hidden');
+                suffixMins.classList.add('hidden');
+
+                prefixHrs.textContent = t.hrsUnit;
+                prefixHrs.classList.remove('hidden');
+                suffixHrs.classList.add('hidden');
+            } else {
+                prefixMins.classList.add('hidden');
+                suffixMins.classList.remove('hidden');
+
+                prefixHrs.classList.add('hidden');
+                suffixHrs.classList.remove('hidden');
+            }
         }
 
         function adjustPeriods(delta) {
@@ -293,17 +312,45 @@
             const remainingMins = totalMins % 60;
             const decimalHrs = (totalMins / 60).toFixed(2);
 
-            // Display Updates
+            // Display Raw Numbers
             document.getElementById('totalMinutes').textContent = totalMins;
             document.getElementById('decimalHours').textContent = decimalHrs;
-            
-            // Formatted Time String
+
             if (currentLang === 'si') {
-                document.getElementById('formattedTime').textContent = `${hours} පැය ${remainingMins} මිනිත්තු`;
-                const periodText = periods === 1 ? t.periodUnitSingular : t.periodUnitPlural;
-                document.getElementById('summaryBadge').textContent = `${periods} ${periodText} × මිනිත්තු ${length}`;
+                // Sinhala: Units placed BEFORE numerical values
+                // Example: පැය 1 මිනිත්තු 40, or මිනිත්තු 40 if hours = 0
+                let formattedStr = "";
+                if (hours > 0 && remainingMins > 0) {
+                    formattedStr = `පැය ${hours} මිනිත්තු ${remainingMins}`;
+                } else if (hours > 0 && remainingMins === 0) {
+                    formattedStr = `පැය ${hours}`;
+                } else {
+                    formattedStr = `මිනිත්තු ${remainingMins}`;
+                }
+
+                document.getElementById('formattedTime').textContent = formattedStr;
+                document.getElementById('summaryBadge').textContent = `පීරියඩ් ${periods} × මිනිත්තු ${length}`;
+
             } else {
-                document.getElementById('formattedTime').textContent = `${hours}h ${remainingMins}m`;
+                // English: Numerical values placed BEFORE units with proper pluralization
+                let hrsText = hours === 1 ? t.hrsUnitSingular : t.hrsUnitPlural;
+                let minsText = remainingMins === 1 ? t.minsUnitSingular : t.minsUnitPlural;
+                
+                let formattedStr = "";
+                if (hours > 0 && remainingMins > 0) {
+                    formattedStr = `${hours} ${hrsText} ${remainingMins} ${minsText}`;
+                } else if (hours > 0 && remainingMins === 0) {
+                    formattedStr = `${hours} ${hrsText}`;
+                } else {
+                    formattedStr = `${remainingMins} ${minsText}`;
+                }
+
+                document.getElementById('formattedTime').textContent = formattedStr;
+
+                // Update English units for single metric cards
+                document.getElementById('suffixMinsUnit').textContent = totalMins === 1 ? t.minsUnitSingular : t.minsUnitPlural;
+                document.getElementById('suffixHrsUnit').textContent = parseFloat(decimalHrs) === 1 ? t.hrsUnitSingular : t.hrsUnitPlural;
+
                 const periodText = periods === 1 ? t.periodUnitSingular : t.periodUnitPlural;
                 document.getElementById('summaryBadge').textContent = `${periods} ${periodText} × ${length} mins`;
             }
