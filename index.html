@@ -317,9 +317,9 @@
                 // Explicitly show 'මිනිත්තු 0' when hours > 0 and remainingMins === 0
                 let formattedStr = "";
                 if (hours > 0) {
-                    formattedStr = `පැය ${hours} මිනිත්තු ${remainingMins}`;
+                    formattedStr = `පැය ${hours} මිනි. ${remainingMins}`;
                 } else {
-                    formattedStr = `මිනිත්තු ${remainingMins}`;
+                    formattedStr = `මිනි. ${remainingMins}`;
                 }
 
                 document.getElementById('formattedTime').textContent = formattedStr;
